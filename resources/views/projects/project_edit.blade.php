@@ -3,7 +3,7 @@
 @section('title', 'Edit Project')
 
 @section('content')
-<div class="container mx-auto px-4 py-15 max-w-xl">
+<div class="container mx-auto px-4 py-8 max-w-xl">
     <div class="bg-white shadow-md rounded-lg p-6">
         <h1 class="text-2xl font-semibold text-gray-800 mb-6">Project Edit</h1>
 
@@ -40,10 +40,29 @@
 
             {{-- Owner Selection --}}
 <div>
-    <label for="owner_id" class="block text-sm font-medium text-gray-700 mb-1">Project Owner</label>
+    <label for="owner_id" class="block text-sm font-medium text-gray-700 mb-1">Manager</label>
     <select
         name="owner_id"
         id="owner_id"
+        class="w-full p-2 border border-gray-300 rounded bg-gray-50"
+        required
+    >
+        <option value="" disabled {{ old('owner_id', $project->owner_id) ? '' : 'selected' }}>Select a user</option>
+
+        @foreach($users as $user)
+            <option value="{{ $user->id }}" {{ old('owner_id', $project->owner_id) == $user->id ? 'selected' : '' }}>
+                {{ $user->name }}
+            </option>
+        @endforeach
+    </select>
+</div>
+
+<div>
+    <label for="members" class="block text-sm font-medium text-gray-700 mb-1">Members</label>
+    <select
+        name="members[]"
+        id="members"
+        multiple
         class="w-full p-2 border border-gray-300 rounded bg-gray-50"
         required
     >

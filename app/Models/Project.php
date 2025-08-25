@@ -12,7 +12,15 @@ class Project extends Model
     
     protected $fillable=['name','description','owner_id'];
 
-    public function owner(){
-        return $this->belongsTo(User::class,'owner_id');
-    }
+   // Owner of the project
+public function owner()
+{
+    return $this->belongsTo(User::class, 'owner_id');
+}
+
+// Members of the project
+public function members()
+{
+    return $this->belongsToMany(User::class, 'project_user', 'project_id', 'user_id');
+}
 }

@@ -31,13 +31,13 @@
             <header class="flex justify-between items-center bg-white shadow-md p-4">
                 <h1 class="text-lg font-semibold">@yield('header', 'Dashboard')</h1>
                 <div class="flex items-center space-x-4">
-                    <span class="text-gray-600">{{ auth()->user()->name ?? 'Guest' }}</span>
+                    <a href="{{ route('profile') }}"><span class=" text-green-500 font-semibold">{{ auth()->user()->name ?? 'Guest' }}</span></a>
 
                     @if (auth()->user())
                     
                          <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                           <button type="submit">Logout</button>
+                           <input type="submit" value="Logout" class="text-rose-500 font-bold cursor-pointer">
                         </form>
 
                     @else
@@ -50,10 +50,23 @@
 
             {{-- Page Content --}}
             <main class="flex-1 p-6 overflow-y-auto">
+                @if (session('success'))
+                    <div id="success-message" class="bg-green-500 text-white-500 p-2 rounded-lg mb-4 transition duration-300">
+                          {{ session('success') }}
+                    </div>
+                @endif
+
                 @yield('content')
             </main>
         </div>
     </div>
-
 </body>
 </html>
+
+<script>
+    setTimeout(() => {
+            const el = document.getElementById('success-message');
+            if (el) el.style.display = 'none';
+        }, 3000); // 3 seconds
+
+</script>

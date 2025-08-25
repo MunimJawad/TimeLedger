@@ -10,8 +10,21 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     //For Admin 
-    public function index(){
-        $users=User::withTrashed()->get();
+    public function index(Request $request){
+
+        $query=$request->input('search');
+
+      $users = User::withTrashed()
+    ->when($query, function ($builder) use ($query) {
+        $builder->where(function ($q) use ($query) {
+            $q->where('name', 'like', '%' . $query . '%')
+              ->orWhere('email', 'like', '%' . $query . '%')
+              ->orWhere('role', 'like', '%' . $query . '%');
+        });
+    })
+    ->paginate(20)
+    ->appends(['search'=>$query]);
+
         return view('admin.users',compact('users'));
     }
 
