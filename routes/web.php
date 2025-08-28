@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskController;
 
 Route::get('/',function(){
     return view('welcome');
@@ -40,6 +41,16 @@ Route::middleware('auth')->group(function(){
       Route::get('/admin/projects/{project}/edit',[ProjectController::class,'edit'])->name('projects.edit');
       Route::put('admin/projects/{project}',[ProjectController::class,'update'])->name('projects.update');
       Route::delete('/admin/projects/{project}/delete',[ProjectController::class,'destroy'])->name('projects.destroy');
+      Route::patch('/admin/projects/{projectID}/restore',[ProjectController::class,'restore'])->name('projects.restore');
+     
+      
+
+      Route::get('/projects/{project}/tasks/',[TaskController::class,'create'])->name('projects.task.create');
+      Route::post('/projects/{project}/tasks/store',[TaskController::class,'store'])->name('projects.task.store');
+      Route::get('/projects/{project}/tasks/{task}/edit',[TaskController::class,'edit'])->name('projects.task.edit');
+      Route::put('/projects/{project}/tasks/{task}/edit',[TaskController::class,'update'])->name('projects.task.update');
+      Route::delete('/projects/{project}/tasks/{task}/delete',[TaskController::class,'destroy'])->name('projects.task.destroy');
+      Route::patch('/projects/{project}/tasks/{task}/restore', [TaskController::class, 'restore'])->name('projects.task.restore');
 
       Route::middleware('role:admin')->group(function(){
 

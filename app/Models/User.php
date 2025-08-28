@@ -60,6 +60,15 @@ public function memberProjects()
     return $this->belongsToMany(Project::class, 'project_user', 'user_id', 'project_id');
 }
 
+
+   public function assignedTasks(){
+    return $this->hasMany(Task::class,'assigned_to');
+   }
+
+   public function collaboratedTasks(){
+    return $this->belongsToMany(Task::class,'task_user');
+   }
+
     public function isAdmin(){
         return $this->role==='admin';
     }

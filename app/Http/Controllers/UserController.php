@@ -10,23 +10,38 @@ use Illuminate\Support\Facades\Hash;
 class UserController extends Controller
 {
     //For Admin 
-    public function index(Request $request){
+ public function index(Request $request)
+{
+    $query = $request->input('search');
+    $status = $request->input('status', 'active'); // default to active
 
-        $query=$request->input('search');
+    $usersQuery = User::query();
 
-      $users = User::withTrashed()
-    ->when($query, function ($builder) use ($query) {
-        $builder->where(function ($q) use ($query) {
+    // Apply soft delete status filter
+    if ($status === 'inactive') {
+        $usersQuery->onlyTrashed();
+    } elseif ($status === 'all') {
+        $usersQuery->withTrashed();
+    }
+
+    $count=$usersQuery->count();
+
+    // Apply search
+    if ($query) {
+        $usersQuery->where(function ($q) use ($query) {
             $q->where('name', 'like', '%' . $query . '%')
               ->orWhere('email', 'like', '%' . $query . '%')
               ->orWhere('role', 'like', '%' . $query . '%');
         });
-    })
-    ->paginate(20)
-    ->appends(['search'=>$query]);
-
-        return view('admin.users',compact('users'));
     }
+
+    $users = $usersQuery
+        ->paginate(20)
+        ->appends(['search' => $query, 'status' => $status]);
+
+    return view('admin.users', compact('users', 'status','count'));
+}
+
 
     public function edit(User $user){
       

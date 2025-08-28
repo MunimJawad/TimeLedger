@@ -6,42 +6,93 @@ use Illuminate\Http\Request;
 use App\Models\Project;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Models\Task;
 
 class ProjectController extends Controller
 {   
    public function index(Request $request)
 {
     $query = $request->input('search');
+    $status = $request->input('status', 'active'); // default to 'active'
     $user = Auth::user();
 
-    $projects = Project::with('owner','members')
-        ->when($user->role !== 'admin', function ($builder) use ($user) {
-            // If not admin: show only projects user owns or is a member of
-            $builder->where(function ($q) use ($user) {
-                $q->where('owner_id', $user->id) // Make sure this matches your DB field
-                  ->orWhereHas('members', function ($memberQuery) use ($user) {
-                      $memberQuery->where('users.id', $user->id);
-                  });
-            });
-        })
-        ->when($query, function ($builder) use ($query) {
-            // Apply search to project name or owner name
-            $builder->where(function ($q) use ($query) {
-                $q->where('name', 'like', '%' . $query . '%')
-                  ->orWhereHas('owner', function ($q2) use ($query) {
-                      $q2->where('name', 'like', '%' . $query . '%');
-                  });
-            });
-        })
-        ->paginate(10)
-        ->appends(['search' => $query]);
+    // Start base query (without soft deletes yet)
+    $projectsQuery = Project::query()
+        ->with('owner', 'members');
 
-    return view('projects.projects_index', compact('projects'));
+    // Apply soft delete filtering based on 'status'
+    if ($status === 'inactive') {
+        $projectsQuery->onlyTrashed();
+    } elseif ($status === 'all') {
+        $projectsQuery->withTrashed();
+    } // else: active (default) — do nothing, just don't include trashed
+
+    // User-based access control
+    if ($user->role !== 'admin') {
+        $projectsQuery->where(function ($q) use ($user) {
+            $q->where('owner_id', $user->id)
+              ->orWhereHas('members', function ($memberQuery) use ($user) {
+                  $memberQuery->where('users.id', $user->id);
+              });
+        });
+    }
+
+  // Search filter
+if ($query) {
+    $projectsQuery->where(function ($queryBuilder) use ($query) {
+        $queryBuilder->where('name', 'like', '%' . $query . '%')
+            ->orWhereHas('owner', function ($q) use ($query) {
+                $q->where('name', 'like', '%' . $query . '%');
+            })
+            ->orWhereHas('members', function ($memberQuery) use ($query) {
+                $memberQuery->where('name', 'like', '%' . $query . '%');
+            });
+    });
 }
 
-    public function show(Project $project){
-        return view('projects.project_detail',compact('project'));
+    $count=$projectsQuery->count();
+
+      $projects = $projectsQuery
+        ->paginate(10)
+        ->appends([
+            'search' => $query,
+            'status' => $status
+        ]);
+
+        
+    return view('projects.projects_index', compact('projects', 'status','count'));
+}
+
+    public function show(Request $request,Project $project){
+      
+       
+       $search=$request->input('search');      
+       $status=$request->input('status'); 
+       $tasksQuery = $project->tasks()->with(['assignee', 'collaborators'])->latest();
+
+         // Apply soft delete filtering based on 'status'
+    if ($status === 'inactive') {
+       $tasksQuery->onlyTrashed();
+    } elseif ($status === 'all') {
+        $tasksQuery->withTrashed();
+    } // else: active (default) — do nothing, just don't include trashed
+
+
+       if($search){
+          
+           $tasksQuery->where(function($query) use ($search){
+               $query->where('title', 'like', '%' . $search . '%')
+               ->orWhereHas('assignee',function($q) use($search){
+                $q->where('name', 'like', '%' . $search . '%');
+               });
+           });
+       }
+
+       $tasks=$tasksQuery->paginate(10)->withQueryString();
+
+        return view('projects.project_detail',compact('project','tasks'));
     }
+
     public function create(){
         $users = User::all();
         return view('projects.projects_create',compact('users'));
@@ -98,6 +149,14 @@ class ProjectController extends Controller
 
     public function destroy(Project $project){
         $project->delete();
-        return redirect()->back()->with('success','Post Deleted Successfully');
+        return redirect()->back()->with('success','Project Deleted Successfully');
     }
+
+   public function restore($projectID)
+     {
+         $project = Project::withTrashed()->findOrFail($projectID);
+         $project->restore();
+     
+         return redirect()->route('projects.index')->with('success', 'Project Restored Successfully');
+     }
 }

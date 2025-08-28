@@ -23,4 +23,9 @@ public function members()
 {
     return $this->belongsToMany(User::class, 'project_user', 'project_id', 'user_id');
 }
+
+public function tasks(){
+    return $this->hasMany(Task::class);
+}
+
 }
