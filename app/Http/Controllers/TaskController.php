@@ -36,6 +36,10 @@ class TaskController extends Controller
         return redirect()->route('projects.show', $project)->with('success', 'Task created successfully.');
     }
 
+    public function show(Project $project,Task $task){
+       return view('tasks.task_detail',compact('task','project'));
+    }
+
      public function destroy(Project $project, Task $task) {
         $task->delete();
         return redirect()->route('projects.show', $project)->with('success', 'Task deleted successfully.');

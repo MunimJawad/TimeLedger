@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\CommentController;
 
 Route::get('/',function(){
     return view('welcome');
@@ -43,14 +44,17 @@ Route::middleware('auth')->group(function(){
       Route::delete('/admin/projects/{project}/delete',[ProjectController::class,'destroy'])->name('projects.destroy');
       Route::patch('/admin/projects/{projectID}/restore',[ProjectController::class,'restore'])->name('projects.restore');
      
-      
-
+      //Tasks
+      Route::get('/projects/{project}/tasks/{task}/show',[TaskController::class,'show'])->name('projects.task.show');
       Route::get('/projects/{project}/tasks/',[TaskController::class,'create'])->name('projects.task.create');
       Route::post('/projects/{project}/tasks/store',[TaskController::class,'store'])->name('projects.task.store');
       Route::get('/projects/{project}/tasks/{task}/edit',[TaskController::class,'edit'])->name('projects.task.edit');
       Route::put('/projects/{project}/tasks/{task}/edit',[TaskController::class,'update'])->name('projects.task.update');
       Route::delete('/projects/{project}/tasks/{task}/delete',[TaskController::class,'destroy'])->name('projects.task.destroy');
       Route::patch('/projects/{project}/tasks/{task}/restore', [TaskController::class, 'restore'])->name('projects.task.restore');
+      
+      //Comments
+      Route::post('tasks/{task}/comment',[CommentController::class,'store'])->name('tasks.comment.store');
 
       Route::middleware('role:admin')->group(function(){
 

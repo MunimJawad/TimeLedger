@@ -69,6 +69,11 @@ public function memberProjects()
     return $this->belongsToMany(Task::class,'task_user');
    }
 
+   public function comments()
+{
+    return $this->hasMany(Comment::class);
+}
+
     public function isAdmin(){
         return $this->role==='admin';
     }

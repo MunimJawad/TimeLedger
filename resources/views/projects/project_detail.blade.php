@@ -114,7 +114,7 @@
     <tbody>
         @foreach($tasks as $task)
         <tr>
-            <td class="border px-4 py-2">{{ $task->title }}</td>
+            <td class="border px-4 py-2"><a href="{{ route('projects.task.show',[$project,$task]) }}" class="text-blue-600">{{ $task->title }}</a></td>
             <td class="border px-4 py-2">{{ $task->assignee?->name ?? 'Unassigned' }}</td>
             <td class="border px-4 py-2">
                 @foreach($task->collaborators as $collab)

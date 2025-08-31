@@ -97,7 +97,7 @@
                        @csrf
                        @method('PATCH')
                         <button type="submit" 
-                                class="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded">
+                                class="bg-purple-500 hover:bg-purple-700 text-white text-xs font-semibold px-3 py-1 rounded">
                             Restore
                         </button>
                     </form>
