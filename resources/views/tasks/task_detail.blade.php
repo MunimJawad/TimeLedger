@@ -45,9 +45,22 @@
     <!-- Comments List -->
     @forelse ($task->comments->sortByDesc('created_at') as $comment)
         <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4 shadow-sm">
-            <div class="text-sm text-gray-500 mb-2">
+            <div class="text-sm text-gray-500 mb-2 flex justify-between">
+                <div>
                 <strong class="text-indigo-600">{{ $comment->user->name }}</strong> · 
-                <span>{{ $comment->created_at->diffForHumans() }}</span>
+                <span>{{ $comment->created_at->diffForHumans() }}</span></div>
+                @if (request()->user()?->id == $comment->user->id || request()->user()?->role=='admin')
+                <div class="flex space-x-2">
+                    <a href="{{ route('tasks.comment.edit', [$task,$comment]) }}" class= "bg-blue-500 w-fit px-3 py-1 mt-2 text-white rounded">Edit</a>
+                   <form action="{{ route('tasks.comment.destroy', [$task, $comment]) }}" method="POST">
+    @csrf
+    @method('DELETE')
+    <button type="submit" class="bg-red-500 w-fit px-3 py-1 mt-2 text-white rounded">Delete</button>
+</form>
+                     
+                </div>
+                @endif
+                
             </div>
 
             <div class="text-gray-800 leading-relaxed">

@@ -25,13 +25,21 @@
             </nav>
         </aside>
 
+
+     
+
         {{-- Main Content --}}
         <div class="flex-1 flex flex-col">
             {{-- Header --}}
             <header class="flex justify-between items-center bg-white shadow-md p-4">
+                
+
                 <h1 class="text-lg font-semibold">@yield('header', 'Dashboard')</h1>
                 <div class="flex items-center space-x-4">
                     <a href="{{ route('profile') }}"><span class=" text-green-500 font-semibold">{{ auth()->user()->name ?? 'Guest' }}</span></a>
+                    
+                       <!-- resources/views/layouts/partials/notifications.blade.php -->
+                        @include('layouts.partials.notifications')
 
                     @if (auth()->user())
                     

@@ -55,7 +55,11 @@ Route::middleware('auth')->group(function(){
       
       //Comments
       Route::post('tasks/{task}/comment',[CommentController::class,'store'])->name('tasks.comment.store');
-
+      Route::get('/tasks/{task}/comment/{comment}/edit',[CommentController::class,'edit'])->name('tasks.comment.edit');
+      Route::put('/tasks/{task}/comment/{comment}/update', [CommentController::class, 'update'])->name('tasks.comment.update');
+      Route::delete('/tasks/{task}/comment/{comment}/destroy', [CommentController::class, 'destroy'])->name('tasks.comment.destroy');
+      
+  
       Route::middleware('role:admin')->group(function(){
 
            Route::get('/admin/user_list',[UserController::class,'index'])->name('admin.user_list');
