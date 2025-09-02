@@ -69,6 +69,7 @@
         @forelse ($projects as $project)
             <div class="bg-white shadow-sm border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
                 <a href="{{ route('projects.show',$project->id) }}"><h2 class="text-lg text-blue-600 font-semibold">{{ $project->name }}</h2></a>
+                <small class="font-semibold">Deadline:{{ $project->deadline }}</small>
                 <p class="text-gray-600 text-sm mt-1">{{ $project->description ?? 'No description provided.' }}</p>
                 <div class="mt-3 text-sm text-gray-500 mb-2">
                     <span class="font-medium text-gray-700">Manager:</span> {{ $project->owner->name ?? 'N/A' }}

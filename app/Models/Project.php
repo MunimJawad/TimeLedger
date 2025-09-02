@@ -10,7 +10,7 @@ class Project extends Model
 {
     use HasFactory, SoftDeletes;
     
-    protected $fillable=['name','description','owner_id'];
+    protected $fillable=['name','description','owner_id','deadline'];
 
    // Owner of the project
 public function owner()

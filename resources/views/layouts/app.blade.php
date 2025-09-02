@@ -15,7 +15,7 @@
         <aside class="w-50 bg-gray-900 shadow-md flex-shrink-0 text-white">
             <div class="p-6 font-bold text-xl border-b-gray-500">TimeLedger</div>
             <nav class="mt-6">
-                <a href="" class="block px-6 py-2 hover:bg-zinc-800 rounded">Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="block px-6 py-2 hover:bg-zinc-800 rounded">Dashboard</a>
                 <a href="{{ route('projects.index') }}" class="block px-6 py-2 hover:bg-zinc-800 rounded">Projects</a>
                 @auth
                  @if (auth()->user()?->role == 'admin')              

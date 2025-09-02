@@ -16,7 +16,7 @@
     <select name="status" class="border p-2 w-full mb-3">
             <option value="todo" {{ $task->status == 'todo' ? 'selected' : '' }}>To Do</option>
             <option value="in_progress" {{ $task->status == 'in_progress' ? 'selected' : '' }}>In Progress</option>
-            <option value="completed" {{ $task->status == 'done' ? 'selected' : '' }}>Done</option>
+            <option value="done" {{ $task->status == 'done' ? 'selected' : '' }}>Done</option>
     </select>
 
     <label>Assign To</label>

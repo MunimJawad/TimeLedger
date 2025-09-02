@@ -38,6 +38,18 @@
                 >{{ $project->description }}</textarea>
             </div>
 
+              {{-- Deadline Selection --}}
+             <div>
+                <label for="deadline" class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
+               <input
+                    type="date"
+                    name="deadline"
+                    id="deadline"
+                    class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-400 focus:outline-none bg-gray-50"
+                    value="{{ $project->deadline }}"
+                >
+            </div>
+
             {{-- Owner Selection --}}
 <div>
     <label for="owner_id" class="block text-sm font-medium text-gray-700 mb-1">Manager</label>
@@ -58,22 +70,24 @@
 </div>
 
 <div>
-    <label for="members" class="block text-sm font-medium text-gray-700 mb-1">Members</label>
-    <select
-        name="members[]"
-        id="members"
-        multiple
-        class="w-full p-2 border border-gray-300 rounded bg-gray-50"
-        required
-    >
-        <option value="" disabled {{ old('owner_id', $project->owner_id) ? '' : 'selected' }}>Select a user</option>
+  <label for="members" class="block text-sm font-medium text-gray-700 mb-1">Members</label>
+<select
+    name="members[]"
+    id="members"
+    multiple
+    class="w-full p-2 border border-gray-300 rounded bg-gray-50"
+    required
+>
+    <option value="" disabled {{ old('members', $project->members->pluck('id')->toArray()) ? '' : 'selected' }}>Select a user</option>
 
-        @foreach($users as $user)
-            <option value="{{ $user->id }}" {{ old('owner_id', $project->owner_id) == $user->id ? 'selected' : '' }}>
-                {{ $user->name }}
-            </option>
-        @endforeach
-    </select>
+    @foreach($users as $user)
+        <option value="{{ $user->id }}"
+            {{ in_array($user->id, old('members', $project->members->pluck('id')->toArray())) ? 'selected' : '' }}>
+            {{ $user->name }}
+        </option>
+    @endforeach
+</select>
+
 </div>
 
             {{-- Submit Button --}}

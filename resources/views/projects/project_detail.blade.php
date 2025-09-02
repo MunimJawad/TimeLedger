@@ -2,12 +2,56 @@
 @section('title', 'Project Detail')
 
 @section('content')
-    <div class="w-full mx-auto bg-white shadow-md rounded-lg p-6 space-y-4">
+
+{{-- Visualization List Header --}}
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 mb-6">
+    <h1 class="text-3xl font-bold mb-8">{{ $project->name }} Dashboard</h1>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
+        <div class="bg-white shadow rounded-lg p-5 text-center">
+            <h5 class="text-gray-600">Total Tasks</h5>
+            <h3 class="text-2xl font-bold">{{ $stats['totalTasks'] }}</h3>
+        </div>
+        <div class="bg-green-100 shadow rounded-lg p-5 text-center">
+            <h5 class="text-gray-600">Completed</h5>
+            <h3 class="text-2xl font-bold text-green-700">{{ $stats['completedTasks'] }}</h3>
+        </div>
+        <div class="bg-yellow-100 shadow rounded-lg p-5 text-center">
+            <h5 class="text-gray-600">Pending</h5>
+            <h3 class="text-2xl font-bold text-yellow-700">{{ $stats['pendingTasks'] }}</h3>
+        </div>
+        <div class="bg-blue-100 shadow rounded-lg p-5 text-center">
+            <h5 class="text-gray-600">In Progress</h5>
+            <h3 class="text-2xl font-bold text-blue-700">{{ $stats['inProgressTasks'] }}</h3>
+        </div>
+    </div>
+
+
+ <!-- Progress Bar -->
+    <div class="mb-10">
+        <h4 class="text-xl font-semibold mb-2">Project Progress</h4>
+        <div class="w-full bg-gray-200 h-6 rounded-full overflow-hidden">
+            <div class="h-6 text-white text-sm font-medium text-center leading-6 
+                @if($stats['progress'] == 100) bg-green-500
+                @elseif($stats['progress'] >= 50) bg-blue-500
+                @else bg-yellow-400
+                @endif"
+                style="width: {{ $stats['progress'] }}%;">
+                {{ $stats['progress'] }}%
+            </div>
+        </div>
+    </div>
+
+    </div>
+ <!-- Project Data -->
+    <div class="w-full  bg-white shadow-md rounded-lg space-y-4  mx-auto px-4 sm:px-6 lg:px-8 py-6 ">
         <h1 class="text-2xl font-bold text-gray-800">{{ $project->name }}</h1>
 
         <div class="text-sm text-gray-500">
             <span class="font-medium text-gray-700">Owner:</span> {{ $project->owner->name ?? 'Not assigned yet'}} |
-            <span class="ml-2">{{ $project->created_at->format('M d, Y') }}</span>
+            <span class="">Created: {{ $project->created_at->format('M d, Y') }}</span>
+            <span class="">| Deadline: {{ \Carbon\Carbon::parse($project->deadline)->format('M d, Y') }}</span>
         </div>
 
         <p class="text-gray-700 leading-relaxed">{{ $project->description }}</p>
@@ -29,6 +73,9 @@
        
         
     </div>
+    
+
+    
 
     <div class="container mx-auto px-4 py-20">
 
@@ -152,8 +199,11 @@
     </tbody>
 </table>
 
+    </div>
+
 <!-- Pagination -->
 <div class="mt-4">
     {{ $tasks->links() }}
 </div>
+
 @endsection

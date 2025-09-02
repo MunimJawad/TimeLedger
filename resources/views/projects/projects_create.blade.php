@@ -34,6 +34,19 @@
                     placeholder="Enter a brief description..."
                 ></textarea>
             </div>
+            
+            {{-- Deadline Selection --}}
+             <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Deadline</label>
+                <input
+                    type="date"
+                    name="deadline"
+                    id="deadline"
+                    rows="4"
+                    class="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-400 focus:outline-none bg-gray-50"
+                    placeholder="Enter a brief description..."
+                >
+            </div>
 
             {{-- Owner Selection --}}
 <div>

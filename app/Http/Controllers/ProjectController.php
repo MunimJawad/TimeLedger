@@ -90,7 +90,37 @@ if ($query) {
 
        $tasks=$tasksQuery->paginate(10)->withQueryString();
 
-        return view('projects.project_detail',compact('project','tasks'));
+       //Visual analytics of indivual project
+
+   // Stats
+    $totalTasks = $tasks->count();
+    $completedTasks = $tasks->where('status', 'done')->count(); // Make sure this matches your enum
+    $pendingTasks = $tasks->where('status', 'todo')->count();
+    $inProgressTasks = $tasks->where('status', 'in_progress')->count();
+
+    $progress = $totalTasks > 0 ? round(($completedTasks / $totalTasks) * 100, 2) : 0;
+
+    // Tasks by deadline (group by month)
+    $tasksByMonth = $tasks->groupBy(function($task) {
+        return \Carbon\Carbon::parse($task->due_date)->format('F');
+    })->map->count();
+
+    // Tasks per member
+    $tasksPerMember = $tasks->groupBy('assigned_to')->map->count();
+
+    // Pack all stats into one array
+    $stats = [
+        'totalTasks' => $totalTasks,
+        'completedTasks' => $completedTasks,
+        'pendingTasks' => $pendingTasks,
+        'inProgressTasks' => $inProgressTasks,
+        'progress' => $progress,
+        'tasksByMonth' => $tasksByMonth,
+        'tasksPerMember' => $tasksPerMember,
+    ];
+       
+
+        return view('projects.project_detail',compact('project','tasks','stats'));
     }
 
     public function create(){
@@ -105,14 +135,16 @@ if ($query) {
                 'description'=>'nullable|string',
                 'owner_id' => 'required|exists:users,id',
                 'members'=>'nullable|array',
-                'members.*'=>'exists:users,id'
+                'members.*'=>'exists:users,id',
+                'deadline' => 'nullable|date|after_or_equal:today',
             ]
          );
 
          $project=Project::create([
             'name'=>$request->name,
             'description'=>$request->description,
-            'owner_id'=>$request->owner_id
+            'owner_id'=>$request->owner_id,
+            'deadline'=>$request->deadline
          ]);
 
           if ($request->has('members')) {
@@ -135,10 +167,11 @@ if ($query) {
         'owner_id' => 'required|exists:users,id',
         'members' => 'nullable|array',
         'members.*' => 'exists:users,id',
+        'deadline' => 'nullable|date|after_or_equal:today',
     ]);
 
     // Update project fields
-    $project->update($request->only('name', 'description', 'owner_id'));
+    $project->update($request->only('name', 'description', 'owner_id','deadline'));
 
     // Sync members (replaces existing members with new selection)
     $project->members()->sync($request->members ?? []);
