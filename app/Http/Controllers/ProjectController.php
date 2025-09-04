@@ -8,6 +8,9 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Models\Task;
 
+use App\Notifications\ProjectCreated;
+use Illuminate\Support\Facades\Notification;
+
 class ProjectController extends Controller
 {   
    public function index(Request $request)
@@ -62,6 +65,7 @@ if ($query) {
         
     return view('projects.projects_index', compact('projects', 'status','count'));
 }
+
 
     public function show(Request $request,Project $project){
       
@@ -123,10 +127,12 @@ if ($query) {
         return view('projects.project_detail',compact('project','tasks','stats'));
     }
 
+
     public function create(){
         $users = User::all();
         return view('projects.projects_create',compact('users'));
     }
+
 
     public function store(Request $request){
          $request->validate(
@@ -151,16 +157,39 @@ if ($query) {
         $project->members()->attach($request->members);
     }
 
+    //Notification System
+        $adminUsers=User::where('role','admin')->get();
+        $owner=User::find($request->owner_id);
+
+        $members=Collect();
+
+        if($request->has('members')){
+          $members=User::whereIn('id',$request->members)->get();
+        }
+
+        $allToNotify=$adminUsers->merge($members)->push($owner)->unique('id');
+        $message = 'Project "' . $project->name . '" created.';
+
+        Notification::send($allToNotify,new ProjectCreated($message,$project));
+
          return redirect()->route('projects.index')->with('success','Project Created Successfully');
     }
+
+    
 
     public function edit(Project $project){
          $users = User::all();
         return view('projects.project_edit',compact('project','users'));
     }
 
+
+
   public function update(Request $request, Project $project)
 {
+    $previousName=$project->name;
+    $previousowner=$project->owner_id;
+    $previousMembers=$project->members->pluck('id')->sort()->values()->all();
+
     $request->validate([
         'name' => 'required|string|max:255',
         'description' => 'nullable|string',
@@ -176,19 +205,77 @@ if ($query) {
     // Sync members (replaces existing members with new selection)
     $project->members()->sync($request->members ?? []);
 
+    //Get the admin users
+
+    $adminUsers=User::where('role','admin')->get();
+    $owner=$project->owner;
+    $members=$project->members;
+    $allToNotify=$adminUsers->merge($members)->push($owner)->unique('id');
+
+    //convert new requested members to array
+
+    $newMembers = collect($request->members ?? [])->sort()->values()->all();
+
+    if ($previousName !== $request->name) {
+          $message = 'Name of Project "' . $project->name . '" updated.';
+    }elseif ((int) $previousowner !== (int) $request->owner_id) {
+          $message = 'Manager of Project "' . $project->name . '" updated.';
+    }elseif ($previousMembers !== $newMembers) {
+        $addedMembers=array_diff($newMembers,$previousMembers);
+        $removedMembers = array_diff($previousMembers, $newMembers);
+
+        $addedMemberNames=User::whereIn('id',$addedMembers)->pluck('name')->toArray();
+        $removedMemberNames=User::whereIn('id',$removedMembers)->pluck('name')->toArray();
+        $parts=[];
+        if(!empty($addedMemberNames)){
+            $parts[]='Added members name: '.implode(', ',$addedMemberNames);
+        }
+
+        if(!empty($removedMemberNames)){
+            $parts[]='Removed Members: '.implode(', ',$removedMemberNames);
+        }
+
+        $message = 'Members of Project "' . $project->name . '" updated. ' . implode('; ', $parts);
+    }else {
+          $message = 'Project "' . $project->name . '" updated.';
+      }
+    Notification::send($allToNotify,new ProjectCreated($message,$project));
+
     return redirect()->route('projects.index')->with('success', 'Project Updated Successfully');
 }
 
-
     public function destroy(Project $project){
-        $project->delete();
+       // Get related users BEFORE deleting the project
+    $adminUsers = User::where('role', 'admin')->get();
+    $owner = $project->owner; // Assuming relation exists: $project->owner
+    $members = $project->members; // Assuming relation exists: $project->members()
+
+    $allToNotify = $adminUsers->merge($members)->push($owner)->unique('id');
+
+    $project->delete(); // Now safe to delete
+
+    $message = 'Project "' . $project->name . '" was deleted.';
+
+    Notification::send($allToNotify, new ProjectCreated($message,$project));
+
         return redirect()->back()->with('success','Project Deleted Successfully');
     }
 
    public function restore($projectID)
      {
          $project = Project::withTrashed()->findOrFail($projectID);
-         $project->restore();
+
+          $adminUsers = User::where('role', 'admin')->get();
+    $owner = $project->owner; // Assuming relation exists: $project->owner
+    $members = $project->members; // Assuming relation exists: $project->members()
+
+    $allToNotify = $adminUsers->merge($members)->push($owner)->unique('id');
+
+     $project->restore(); // Now safe to delete
+
+    $message = 'Project "' . $project->name . '" was restored.';
+        
+         Notification::send($allToNotify, new ProjectCreated($message,$project));
      
          return redirect()->route('projects.index')->with('success', 'Project Restored Successfully');
      }

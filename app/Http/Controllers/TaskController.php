@@ -6,9 +6,15 @@ use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\Task;
+use Illuminate\Support\Facades\Notification;
+use App\Notifications\TaskNotification;
+
+use App\Helpers\NotificationHelper;
 
 class TaskController extends Controller
-{
+{     
+
+
       public function create(Project $project) {
         $users = $project->members;
         return view('tasks.tasks_create', compact('project', 'users'));
@@ -33,6 +39,24 @@ class TaskController extends Controller
             $task->collaborators()->attach($data['collaborators']);
         }
 
+        //Notifications
+        $adminUsers=User::where('role','admin')->get();
+        $assignedUser=User::find($request->assigned_to);
+        $collaborators=collect();
+
+        if($request->has('collaborators')){
+            $collaborators=User::whereIn('id',$request->collaborators)->get();
+        }
+
+        $allToNotify=$adminUsers->merge($collaborators)->push($assignedUser)->unique('id');
+
+
+        
+
+        $message='New task "'. $task->title.'" created in project "'.$project->name.'"';
+
+        Notification::send($allToNotify,new TaskNotification($message,$project,$task));
+
         return redirect()->route('projects.show', $project)->with('success', 'Task created successfully.');
     }
 
@@ -41,7 +65,12 @@ class TaskController extends Controller
     }
 
      public function destroy(Project $project, Task $task) {
+
         $task->delete();
+        $allToNotify=NotificationHelper::getUsersToNotify($task);
+        $message='Task "'. $task->title.'" deleted from project "'.$project->name.'"';
+        Notification::send($allToNotify,new TaskNotification($message,$project,$task));
+
         return redirect()->route('projects.show', $project)->with('success', 'Task deleted successfully.');
     }
 
@@ -50,6 +79,9 @@ class TaskController extends Controller
     $task = Task::withTrashed()->where('id', $taskId)->firstOrFail();
 
     $task->restore();
+     $allToNotify=NotificationHelper::getUsersToNotify($task);
+     $message='Task "'. $task->title.'" Restored from project "'.$project->name.'"';
+     Notification::send($allToNotify,new TaskNotification($message,$project,$task));
 
     return redirect()->route('projects.show', $project)->with('success', 'Task restored successfully');
 }

@@ -1,1 +1,0 @@
-<a href="" class="text-yellow-500 font-bold cursor-pointer">Inbox <span>10</span></a>
