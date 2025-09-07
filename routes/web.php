@@ -36,13 +36,13 @@ Route::middleware('auth')->group(function(){
 
       Route::get('/dashboard',[DashboardController::class,'index'])->name('dashboard');
 
-Route::get('/notifications', function () {
-    $user = Auth::user();
-
-    $notifications = $user->notifications()->paginate(20);// All notifications
-    // Only read
-    return view('notifications', compact('notifications'));
-})->name('notifications');
+      Route::get('/notifications', function () {
+          $user = Auth::user();
+      
+          $notifications = $user->notifications()->paginate(20);// All notifications
+          // Only read
+          return view('notifications', compact('notifications'));
+      })->name('notifications');
       
       Route::get('/profile',[UserController::class,'profile'])->name('profile');
       Route::get('/profile/edit',[UserController::class,'profileEditForm'])->name('profile.edit');

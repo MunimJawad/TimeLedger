@@ -263,20 +263,20 @@ if ($query) {
 
    public function restore($projectID)
      {
-         $project = Project::withTrashed()->findOrFail($projectID);
+        $project = Project::withTrashed()->findOrFail($projectID);
 
-          $adminUsers = User::where('role', 'admin')->get();
-    $owner = $project->owner; // Assuming relation exists: $project->owner
-    $members = $project->members; // Assuming relation exists: $project->members()
+        $adminUsers = User::where('role', 'admin')->get();
+        $owner = $project->owner; // Assuming relation exists: $project->owner
+        $members = $project->members; // Assuming relation exists: $project->members()
 
-    $allToNotify = $adminUsers->merge($members)->push($owner)->unique('id');
+        $allToNotify = $adminUsers->merge($members)->push($owner)->unique('id');
 
-     $project->restore(); // Now safe to delete
+        $project->restore(); // Now safe to delete
 
-    $message = 'Project "' . $project->name . '" was restored.';
+        $message = 'Project "' . $project->name . '" was restored.';
         
-         Notification::send($allToNotify, new ProjectCreated($message,$project));
+        Notification::send($allToNotify, new ProjectCreated($message,$project));
      
-         return redirect()->route('projects.index')->with('success', 'Project Restored Successfully');
+        return redirect()->route('projects.index')->with('success', 'Project Restored Successfully');
      }
 }

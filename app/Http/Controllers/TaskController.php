@@ -92,6 +92,12 @@ class TaskController extends Controller
     }
 
     public function update(Request $request,Project $project,Task $task){
+
+        $prevTitle=$task->title;
+        $prevDescription=$task->description;
+        $prevAssignedTo=$task->assigned_to;
+        $prevCollaborators=$task->collaborators->pluck('id')->sort()->values()->all();
+
          $data=$request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -109,6 +115,52 @@ class TaskController extends Controller
          ]);
 
          $task->collaborators()->sync($data['collaborators']  ??  []);
-         return redirect()->route('projects.show',$project)->with('success','Project updated successfully');
+
+         //Get the users to notify
+         $allToNotify=NotificationHelper::getUsersToNotify($task);
+
+         //convert new collaborators to array
+         $newCollaborators=collect($data['collaborators']  ??  [])->sort()->values()->all();
+
+         // Convert new collaborators to an array
+    $newCollaborators = collect($data['collaborators'] ?? [])->sort()->values()->all();
+
+    // Check for collaborator changes first
+    if ($prevCollaborators !== $newCollaborators) {
+        $addedCollaborators = array_diff($newCollaborators, $prevCollaborators);
+        $removedCollaborators = array_diff($prevCollaborators, $newCollaborators);
+
+        // Get the collaborators' names
+        $addedCollaboratorsNames = User::whereIn('id', $addedCollaborators)->pluck('name')->toArray();
+        $removedCollaboratorsNames = User::whereIn('id', $removedCollaborators)->pluck('name')->toArray();
+
+        $parts = [];
+        if (!empty($addedCollaboratorsNames)) {
+            $parts[] = 'Added Collaborators Name: ' . implode(', ', $addedCollaboratorsNames);
+        }
+        if (!empty($removedCollaboratorsNames)) {
+            $parts[] = 'Removed Collaborators Name: ' . implode(', ', $removedCollaboratorsNames);
+        }
+
+        $message = 'Collaborators of task "' . $task->title . '" in "' . $project->name . '" updated. ' . implode('; ', $parts);
+    } 
+    // Check for assignee changes after collaborators (to avoid overwriting the message)
+    else if ($prevAssignedTo !== $task->assigned_to) {
+        $message = '"' . $task->assignee->name . '" updated as the new assignee of "' . $task->title . '" in "' . $project->name . '"';
+    }
+    // Check for title changes
+    else if ($prevTitle !== $task->title) {
+        $message = 'Title of Task "' . $task->title . '" updated in "' . $project->name . '"';
+    } 
+    // If no changes, provide a generic update message
+    else {
+        $message = 'Task "' . $task->title . '" in "' . $project->name . '" updated';
+    }
+
+
+
+         Notification::send($allToNotify,new TaskNotification($message,$project,$task));
+
+         return redirect()->route('projects.show',$project)->with('success','Task updated successfully');
     }
 }

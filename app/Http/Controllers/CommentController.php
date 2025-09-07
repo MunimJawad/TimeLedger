@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Support\Facades\Gate;
 use App\Notifications\TaskActivityNotification;
 
+
 class CommentController extends Controller
 {
     use Authorizable;
