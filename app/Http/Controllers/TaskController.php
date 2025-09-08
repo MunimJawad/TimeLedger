@@ -13,8 +13,6 @@ use App\Helpers\NotificationHelper;
 
 class TaskController extends Controller
 {     
-
-
       public function create(Project $project) {
         $users = $project->members;
         return view('tasks.tasks_create', compact('project', 'users'));
@@ -49,9 +47,6 @@ class TaskController extends Controller
         }
 
         $allToNotify=$adminUsers->merge($collaborators)->push($assignedUser)->unique('id');
-
-
-        
 
         $message='New task "'. $task->title.'" created in project "'.$project->name.'"';
 

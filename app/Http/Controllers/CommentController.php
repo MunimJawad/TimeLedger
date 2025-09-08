@@ -9,7 +9,9 @@ use App\Models\Project;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\Access\Authorizable;
 use Illuminate\Support\Facades\Gate;
-use App\Notifications\TaskActivityNotification;
+use App\Notifications\TaskCommentedNotification;
+use App\Helpers\NotificationHelper;
+use Illuminate\Support\Facades\Notification;
 
 
 class CommentController extends Controller
@@ -38,15 +40,25 @@ class CommentController extends Controller
         }
 
         // Create comment record
-        Comment::create([
+        $comment=Comment::create([
             'task_id' => $task->id,
             'user_id' => auth()->id(),
             'content' => $request->content,
             'file' => $path,
         ]);
+         
+        //Get the project of the task
+        $project=$task->project;
+        //Get the commented user
+        $commentorname=$comment->user->name;
 
-
-
+      
+        //Get the users to notify
+         $allToNotify=NotificationHelper::getUsersToNotify($task);
+         //Notification message
+         $message=$commentorname." commented on ".$task->title. " in ".$project->name;
+         Notification::send($allToNotify,new TaskCommentedNotification($message,$project,$task));
+      
         // Redirect back to the task detail page with success message
         return redirect()->route('projects.task.show', [
             'project' => $task->project_id,

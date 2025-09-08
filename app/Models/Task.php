@@ -30,4 +30,16 @@ class Task extends Model
         return $this->hasMany(Comment::class);
     }
 
+    public function timeEntries(){
+        return $this->hasMany(TimeEntry::class);
+    }
+
+    public function totalTime(){
+        return $this->timeEntries()->sum('duration');
+    }
+
+    public function runningEntryFor($userId){
+        return $this->timeEntries()->where('user_id',$userId)->whereNull('end_time')->first();
+    }
+
 }

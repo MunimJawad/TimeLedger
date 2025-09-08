@@ -74,6 +74,11 @@ public function memberProjects()
     return $this->hasMany(Comment::class);
 }
 
+
+public function timeEntries(){
+    return $this->hasMany(TimeEntry::class);
+}
+
     public function isAdmin(){
         return $this->role==='admin';
     }

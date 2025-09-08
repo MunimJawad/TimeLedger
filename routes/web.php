@@ -7,6 +7,8 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\TimeEntryController;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
@@ -36,13 +38,7 @@ Route::middleware('auth')->group(function(){
 
       Route::get('/dashboard',[DashboardController::class,'index'])->name('dashboard');
 
-      Route::get('/notifications', function () {
-          $user = Auth::user();
-      
-          $notifications = $user->notifications()->paginate(20);// All notifications
-          // Only read
-          return view('notifications', compact('notifications'));
-      })->name('notifications');
+      Route::get('/notifications', [NotificationController::class,'index'])->name('notifications');
       
       Route::get('/profile',[UserController::class,'profile'])->name('profile');
       Route::get('/profile/edit',[UserController::class,'profileEditForm'])->name('profile.edit');
@@ -66,6 +62,10 @@ Route::middleware('auth')->group(function(){
       Route::put('/projects/{project}/tasks/{task}/edit',[TaskController::class,'update'])->name('projects.task.update');
       Route::delete('/projects/{project}/tasks/{task}/delete',[TaskController::class,'destroy'])->name('projects.task.destroy');
       Route::patch('/projects/{project}/tasks/{task}/restore', [TaskController::class, 'restore'])->name('projects.task.restore');
+
+      //Timer
+      Route::post('/tasks/{task}/start', [TimeEntryController::class, 'start'])->name('tasks.start');
+      Route::post('/tasks/{task}/stop', [TimeEntryController::class, 'stop'])->name('tasks.stop');
       
       //Comments
       Route::post('tasks/{task}/comment',[CommentController::class,'store'])->name('tasks.comment.store');

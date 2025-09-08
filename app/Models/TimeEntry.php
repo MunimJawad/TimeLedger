@@ -2,15 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Comment extends Model
+class TimeEntry extends Model
 {
-    use HasFactory,Notifiable;
-
-    protected $fillable=['task_id','user_id','content','file'];
+    use HasFactory;
+    protected $fillable=['task_id','user_id','start_time','end_time','duration'];
 
     public function task(){
         return $this->belongsTo(Task::class);

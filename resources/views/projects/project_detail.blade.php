@@ -149,6 +149,10 @@
             <th class="border px-4 py-2">Assignee</th>
             <th class="border px-4 py-2">Collaborators</th>
             <th class="border px-4 py-2">Status</th>
+           
+            <th class="border px-4 py-2">Tracked Time</th>
+            <th class="border px-4 py-2">Timer</th>
+            
             <th class="border px-4 py-2">Created</th>
             @auth
              @if (auth()->user()->id==$project->owner?->id || auth()->user()->role=='admin' )
@@ -160,6 +164,12 @@
     </thead>
     <tbody>
         @foreach($tasks as $task)
+         @php
+                $running = $task->runningEntryFor(auth()->id());
+                $totalTime = $task->totalTime();
+                $hours = floor($totalTime / 3600);
+                $minutes = floor(($totalTime % 3600) / 60);
+            @endphp
         <tr>
             <td class="border px-4 py-2"><a href="{{ route('projects.task.show',[$project,$task]) }}" class="text-blue-600">{{ $task->title }}</a></td>
             <td class="border px-4 py-2">{{ $task->assignee?->name ?? 'Unassigned' }}</td>
@@ -169,6 +179,27 @@
                 @endforeach
             </td>
             <td class="border px-4 py-2">{{ $task->status }}</td>
+             @if(request()->user()->id ===$task->assignee?->id )
+            <td class="border px-4 py-2">{{ $hours }} h {{ $minutes }} m</td>
+            <td class="border px-4 py-2">
+                    @if($running)
+                        <form method="POST" action="{{ route('tasks.stop', $task) }}">
+                            @csrf
+                            <button class="bg-red-500 text-white px-3 py-1 rounded">Stop</button>
+                        </form>
+                    @else
+                        <form method="POST" action="{{ route('tasks.start', $task) }}">
+                            @csrf
+                            <button class="bg-green-500 text-white px-3 py-1 rounded">Start</button>
+                        </form>
+                    @endif
+                </td>
+
+                @else
+                 <td class="border px-4 py-2"></td>
+                 <td class="border px-4 py-2"></td>
+                @endif
+
             <td class="border px-4 py-2">{{ $task->created_at }}</td>
 
              @auth

@@ -39,7 +39,16 @@
                     <a href="{{ route('profile') }}"><span class=" text-green-500 font-semibold">{{ auth()->user()->name ?? 'Guest' }}</span></a>
                     
                        <!-- resources/views/layouts/partials/notifications.blade.php -->
-                       <a href="{{ route('notifications') }}"><span class=" text-yellow-500 font-semibold">Notifications</span></a>
+                       <a href="{{ route('notifications') }}">
+                           <span class="text-yellow-500 font-semibold">
+                               Notifications
+                               @if ($unreadNotificationsCount > 0)
+                                   <span class="bg-red-500 text-white text-xs rounded-full px-2 py-0.5 ml-1">
+                                       {{ $unreadNotificationsCount }}
+                                   </span>
+                               @endif
+                           </span>
+                       </a>
 
                     @if (auth()->user())
                     
