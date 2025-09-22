@@ -54,7 +54,7 @@
     </form>
 
         @auth
-        @if (auth()->user()?->role =='admin') 
+        @if (auth()->user()?->role =='admin' || auth()->user()?->role=='manager') 
             <a href="{{ route('projects.create') }}"
            class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow transition duration-200 text-sm font-medium">
             + Create Project

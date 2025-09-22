@@ -127,6 +127,11 @@ if ($query) {
         return view('projects.project_detail',compact('project','tasks','stats'));
     }
 
+    //Kanban View
+    public function kanban(Project $project){
+      $tasks = $project->tasks()->with('assignee')->get();
+      return view('projects.kanban',compact('project', 'tasks'));
+    }
 
     public function create(){
         $users = User::all();

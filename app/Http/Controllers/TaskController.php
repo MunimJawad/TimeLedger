@@ -158,4 +158,10 @@ class TaskController extends Controller
 
          return redirect()->route('projects.show',$project)->with('success','Task updated successfully');
     }
+
+
+    public function updateStatus(Request $request,Task $task){
+          $task->update(['status'=>$request->status]);
+          return response()->json(['success'=>true]);
+    }
 }

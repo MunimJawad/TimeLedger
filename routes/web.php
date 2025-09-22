@@ -12,9 +12,28 @@ use App\Http\Controllers\TimeEntryController;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
+use App\Http\Controllers\TestController;
+
 Route::get('/',function(){
     return view('welcome');
 });
+
+//Test Purpose
+Route::get('/django-users', [TestController::class, 'index'])->name('django.users');
+Route::get('/register-user', [TestController::class, 'register']);
+Route::get('/login-user', [TestController::class, 'login']);
+Route::get('/create-category', [TestController::class, 'createNewCategory']);
+Route::post('/create-products', [TestController::class, 'createNewProduct'])->name('create.product');
+Route::delete('/delete-product/{id}', [TestController::class, 'deleteProduct'])->name('delete.product');
+Route::put('/update-product/{id}', [TestController::class, 'updateProduct'])->name('update.product');
+Route::get('/cart', function () {
+    return view('cart');  // loads resources/views/cart.blade.php
+})->name('cart.page');
+
+Route::get('/order_list',[TestController::class,'orderList'])->name('order.list');
+Route::get('/order_detail/{id}',[TestController::class,'order_Detail'])->name('order.detail');
+
+
 
 
 Route::middleware('guest')->group(function(){
@@ -53,6 +72,7 @@ Route::middleware('auth')->group(function(){
       Route::put('admin/projects/{project}',[ProjectController::class,'update'])->name('projects.update');
       Route::delete('/admin/projects/{project}/delete',[ProjectController::class,'destroy'])->name('projects.destroy');
       Route::patch('/admin/projects/{projectID}/restore',[ProjectController::class,'restore'])->name('projects.restore');
+      Route::get('/projects/{project}/kanban',[ProjectController::class,'kanban'])->name('projects.kanban');
      
       //Tasks
       Route::get('/projects/{project}/tasks/{task}/show',[TaskController::class,'show'])->name('projects.task.show');
@@ -62,7 +82,7 @@ Route::middleware('auth')->group(function(){
       Route::put('/projects/{project}/tasks/{task}/edit',[TaskController::class,'update'])->name('projects.task.update');
       Route::delete('/projects/{project}/tasks/{task}/delete',[TaskController::class,'destroy'])->name('projects.task.destroy');
       Route::patch('/projects/{project}/tasks/{task}/restore', [TaskController::class, 'restore'])->name('projects.task.restore');
-
+      Route::patch('/tasks/{task}/status', [TaskController::class, 'updateStatus'])->name('tasks.updateStatus');
       //Timer
       Route::post('/tasks/{task}/start', [TimeEntryController::class, 'start'])->name('tasks.start');
       Route::post('/tasks/{task}/stop', [TimeEntryController::class, 'stop'])->name('tasks.stop');
